@@ -1,0 +1,362 @@
+----------------------------------------
+-- REACT TAB
+----------------------------------------
+sections.ReactLeft:Header({
+    Name = "React Enhancements"
+})
+
+sections.ReactLeft:Button({
+    Name = "Better React",
+    Callback = function()
+        local mt = getrawmetatable(game)
+        local oldNC = mt.__namecall
+        setreadonly(mt, false)
+
+        mt.__namecall = newcclosure(function(self, ...)
+            local args = {...}
+            if not checkcaller()
+                and getnamecallmethod() == "FireServer"
+                and self == workspace.FE.Scorer.RemoteEvent then
+                pcall(function()
+                    workspace.FE.Scorer.RemoteEvent1:FireServer(unpack(args))
+                    workspace.FE.Scorer.RemoteEvent2:FireServer(unpack(args))
+                end)
+                return
+            end
+            return oldNC(self, unpack(args))
+        end)
+
+        setreadonly(mt, true)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "Better Hit Registration",
+    Callback = function()
+        local mt = getrawmetatable(game)
+        local oldNC = mt.__namecall
+
+        if not mt.__oldNC then
+            mt.__oldNC = oldNC
+        end
+
+        local currentOldNC = mt.__oldNC
+        setreadonly(mt, false)
+
+        mt.__namecall = newcclosure(function(self, ...)
+            local args = {...}
+            if not checkcaller()
+                and getnamecallmethod() == "FireServer"
+                and self == workspace.FE.Scorer.RemoteEvent then
+                for _ = 1, 3 do
+                    pcall(function()
+                        workspace.FE.Scorer.RemoteEvent1:FireServer(unpack(args))
+                        workspace.FE.Scorer.RemoteEvent:FireServer(unpack(args))
+                    end)
+                end
+                return
+            end
+            return currentOldNC(self, unpack(args))
+        end)
+
+        setreadonly(mt, true)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "React Killer",
+    Callback = function()
+        local mt = getrawmetatable(game)
+        local oldNC = mt.__namecall
+
+        if not mt.__oldNC then
+            mt.__oldNC = oldNC
+        end
+
+        local currentOldNC = mt.__oldNC
+        setreadonly(mt, false)
+
+        mt.__namecall = newcclosure(function(self, ...)
+            local args = {...}
+            if not checkcaller()
+                and getnamecallmethod() == "FireServer"
+                and self == workspace.FE.Scorer.RemoteEvent then
+                for _ = 1, 10 do
+                    if workspace:FindFirstChild("FE") then
+                        local fe = workspace.FE
+                        if fe:FindFirstChild("Keep") and fe.Keep:FindFirstChild("GK") then
+                            pcall(function() fe.Keep.GK:FireServer(unpack(args)) end)
+                        end
+                        if fe:FindFirstChild("GK") then
+                            local gk = fe.GK
+                            if gk:FindFirstChild("BGKSaves") then pcall(function() gk.BGKSaves:FireServer(unpack(args)) end) end
+                            if gk:FindFirstChild("BGKP") then pcall(function() gk.BGKP:FireServer(unpack(args)) end) end
+                            if gk:FindFirstChild("GGKP") then pcall(function() gk.GGKP:FireServer(unpack(args)) end) end
+                        end
+                    end
+                end
+                return
+            end
+            return currentOldNC(self, unpack(args))
+        end)
+
+        setreadonly(mt, true)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "Defense React",
+    Callback = function()
+        _G.SmartDefense = true
+        local lp = game.Players.LocalPlayer
+        
+        game:GetService("RunService").Heartbeat:Connect(function()
+            if not _G.SmartDefense then return end
+            
+            local char = lp.Character
+            local ball = workspace.TPSSystem:FindFirstChild("TPS") or 
+                         workspace:FindFirstChild("Practice"):FindFirstChild("PSoccerBall") or
+                         workspace:FindFirstChild("TPS")
+
+            if char and ball then
+                local root = char:FindFirstChild("HumanoidRootPart")
+                if root then
+                    local dist = (root.Position - ball.Position).Magnitude
+                    
+                    if dist < 5.5 then
+                        local isOwner = false
+                        local owner = ball:FindFirstChild("Owner")
+                        if owner and owner.Value == lp.Name then isOwner = true end
+
+                        if not isOwner then
+                            for _, v in pairs(ball:GetChildren()) do
+                                pcall(function()
+                                    if v:IsA("BodyVelocity") then
+                                        v.Velocity = Vector3.new(0,0,0)
+                                    elseif v:IsA("AngularVelocity") then
+                                        v.AngularVelocity = Vector3.new(0,0,0)
+                                    elseif v:IsA("BodyForce") or v:IsA("Force") then
+                                        v.Force = Vector3.new(0,0,0)
+                                    end
+                                end)
+                            end
+                            ball.AssemblyLinearVelocity = ball.AssemblyLinearVelocity * 0.05
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "Rime React (NEW)",
+    Callback = function()
+local mt = getrawmetatable(game)
+local oldNC = mt.__namecall
+setreadonly(mt, false)
+
+_G.RimeReactActive = true
+
+local function bypassModule()
+    pcall(function()
+        local backpack = game.Players.LocalPlayer:FindFirstChild("Backpack")
+        local modules = {
+            backpack:FindFirstChild("ToolDribble") and backpack.ToolDribble:FindFirstChild("DribbleModule"),
+            backpack:FindFirstChild("ToolDribble") and backpack.ToolDribble:FindFirstChild("DribbleLModule")
+        }
+        
+        for _, mod in pairs(modules) do
+            if mod then
+                for i = 1, 20 do
+                    local name, val = debug.getupvalue(require(mod).Dribble, i)
+                    if name == "v_u_2" then debug.setupvalue(require(mod).Dribble, i, true) end
+                    if name == "v_u_3" then debug.setupvalue(require(mod).Dribble, i, false) end
+                end
+            end
+        end
+    end)
+end
+
+mt.__namecall = newcclosure(function(self, ...)
+    local args = {...}
+    local method = getnamecallmethod()
+
+    if _G.RimeReactActive and not checkcaller() and method == "FireServer" then
+        if self == workspace.FE.Scorer.RemoteEvent then
+            bypassModule() 
+
+            pcall(function()
+                local ball = workspace.TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("PSoccerBall")
+                if ball and ball:FindFirstChild("APGBDelay") then ball.APGBDelay:Destroy() end
+            end)
+
+            workspace.FE.Scorer.RemoteEvent1:FireServer(unpack(args))
+            workspace.FE.Scorer.RemoteEvent2:FireServer(unpack(args))
+            for i = 1, 3 do
+                oldNC(self, unpack(args))
+            end
+            return
+        end
+    end
+    return oldNC(self, unpack(args))
+end)
+
+setreadonly(mt, true)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "Zero Delay(NEW)",
+    Callback = function()
+        pcall(function()
+            game:GetService("RunService").Heartbeat:Connect(function()
+                pcall(function()
+                    local tpsPart = workspace.TPSSystem and workspace.TPSSystem:FindFirstChild("TPS")
+                    if tpsPart then
+                        for _, item in pairs(tpsPart:GetChildren()) do
+                            if item.Name == "APGBDelay" or item.Name:find("Wait") then
+                                item:Destroy()
+                            end
+                        end
+                    end
+                end)
+            end)
+
+            local FE = game:GetService("ReplicatedStorage"):FindFirstChild("FE")
+            if FE then
+                local importantRemotes = {"ToolDribble", "ToolShoot", "RUpdate", "Sprint", "Ping"}
+                for _, name in pairs(importantRemotes) do
+                    local remote = FE:FindFirstChild(name)
+                    if remote and remote:IsA("RemoteEvent") then
+                        -- Paketlerin işlenme önceliğini artırır (Read-only hatası vermez)
+                        pcall(function()
+                            sethiddenproperty(remote, "ReplicationFocus", Enum.ReplicationFocus.Always)
+                        end)
+                    end
+                end
+
+                if FE:FindFirstChild("Ping") then
+                    FE.Ping.OnClientEvent:Connect(function()
+                        FE.Ping:FireServer()
+                    end)
+                end
+            end
+            
+            settings().Network.IncomingReplicationLag = 0
+        end)
+    end
+})
+
+sections.ReactLeft:Button({
+    Name = "Pure React",
+    Callback = function()
+        if _G.PureReactStarted then return end 
+        _G.PureReactStarted = true
+
+        local Players = game:GetService("Players")
+        local LocalPlayer = Players.LocalPlayer
+        local RunService = game:GetService("RunService")
+
+        local KILL_RANGE = 5.5 
+        local KILL_INTENSITY = 20 
+
+        RunService.Heartbeat:Connect(function()
+            local char = LocalPlayer.Character
+            if not char or not char:FindFirstChild("HumanoidRootPart") then return end
+
+            local ball = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS") 
+                       or (workspace:FindFirstChild("Practice") and workspace.Practice:FindFirstChild("PSoccerBall"))
+
+            if ball then
+                local dist = (char.HumanoidRootPart.Position - ball.Position).Magnitude
+
+                if dist <= KILL_RANGE then
+                    for _, plyr in ipairs(Players:GetPlayers()) do
+                        if plyr ~= LocalPlayer and plyr.Character then
+                            for _, part in ipairs(plyr.Character:GetChildren()) do
+                                if part:IsA("BasePart") then
+                                    for i = 1, KILL_INTENSITY do
+                                        firetouchinterest(part, ball, 1)
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end
+        end)
+    end
+})
+----------------------------------------
+-- FIVEROSE REACTS 
+----------------------------------------
+
+sections.ReactRight:Header({
+    Name = "Fiverose Reacts"
+})
+
+sections.ReactRight:Button({
+    Name = "Main React", -- [cite: 2026-01-28]
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        local ScorerRemote = workspace:WaitForChild("FE"):WaitForChild("Scorer"):WaitForChild("RemoteEvent")
+
+        local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+            local method = getnamecallmethod()
+            local args = {...}
+
+            if not checkcaller() and (method == "FireServer" or method == "InvokeServer") then
+                if self == ScorerRemote then
+                    task.spawn(function()
+                        local ball = args[1] 
+
+                        if ball and typeof(ball) == "Instance" then
+                            for i = 1, 5 do
+                                workspace.FE.Keep.KeepP:FireServer(ball)
+                            end
+
+                            for i = 1, 5 do
+                                workspace.FE.Attach.RemoteEvent:FireServer(ball)
+                            end
+                            
+                        end
+                    end)
+                end
+            end
+            return old(self, ...)
+        end)
+    end
+})
+sections.ReactRight:Button({
+    Name = "React Killer", 
+    Callback = function()
+        local lp = game.Players.LocalPlayer
+        local ScorerRemote = workspace:WaitForChild("FE"):WaitForChild("Scorer"):WaitForChild("RemoteEvent")
+
+        local old; old = hookmetamethod(game, "__namecall", function(self, ...)
+            local method = getnamecallmethod()
+            local args = {...}
+
+            if not checkcaller() and (method == "FireServer" or method == "InvokeServer") then
+                if self == ScorerRemote then
+                    task.spawn(function()
+                        local ball = args[1] 
+                        
+                        if ball and typeof(ball) == "Instance" then
+                            for i = 1, 35 do 
+                                workspace.FE.Keep.GK:FireServer(ball)
+                                workspace.FE.GK.BGKSaves:FireServer(ball)
+                                workspace.FE.GK.BGKP:FireServer(ball)
+                                workspace.FE.GK.GGKP:FireServer(ball)
+                                
+                                if i % 7 == 0 then task.wait() end 
+                            end
+                        end
+                    end)
+                end
+            end
+            return old(self, ...)
+        end)
+    end
+})

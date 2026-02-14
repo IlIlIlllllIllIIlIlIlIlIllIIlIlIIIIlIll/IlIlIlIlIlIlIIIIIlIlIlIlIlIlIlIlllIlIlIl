@@ -1,0 +1,67 @@
+----------------------------------------
+-- FIRETOUCH TAB (MACLIB)
+----------------------------------------
+-- [[ MOTOR ]]
+local PartConnections = {}
+
+local function HandlePartReach(PartName, Distance)
+    if PartConnections[PartName] then PartConnections[PartName]:Disconnect() end
+    
+    if Distance > 0 then
+        PartConnections[PartName] = RunService.RenderStepped:Connect(function()
+            local char = LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+            
+            local ball = workspace:FindFirstChild("TPS") or 
+                         (workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")) or
+                         (workspace:FindFirstChild("Practice") and workspace.Practice:FindFirstChild("PSoccerBall"))
+            
+            if ball then
+                local mag = (root.Position - ball.Position).Magnitude
+                if mag <= Distance then
+                    local targetParts = (PartName == "GK") and {"Right Arm", "Left Arm"} or {PartName}
+                    
+                    for _, pName in ipairs(targetParts) do
+                        local p = char:FindFirstChild(pName)
+                        if p then 
+                            firetouchinterest(p, ball, 0)
+                            firetouchinterest(p, ball, 1) 
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+
+-- =========================================
+-- GLOBAL CONNECTIONS
+-- =========================================
+local PartConnections = {}
+local ToggleConnections = {}
+
+sections.FireTouchLeft:Header({
+    Name = "FireTouch"
+})
+
+local function CreateReachSlider(partName, initialValue)
+    sections.FireTouchLeft:Slider({
+        Name = partName .. " Studs",
+        Default = initialValue or 0,
+        Minimum = 0,
+        Maximum = 30,
+        Precision = 1,
+        DisplayMethod = "Value",
+        Callback = function(Value)
+            local FloorValue = math.floor(Value * 10) / 10
+            HandlePartReach(partName, FloorValue)
+        end
+    })
+end
+
+CreateReachSlider("Left Leg")
+CreateReachSlider("Right Leg")
+CreateReachSlider("Torso")
+CreateReachSlider("Head")
+CreateReachSlider("GK")

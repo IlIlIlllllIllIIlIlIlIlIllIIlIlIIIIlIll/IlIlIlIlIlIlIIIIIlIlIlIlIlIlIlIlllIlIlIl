@@ -1,0 +1,51 @@
+----------------------------------------
+-- AUTO SKILL TAB
+----------------------------------------
+local AutoSkillLeftSection = tabs.AutoSkill:Section({ Side = "Left" })
+_G.touchThreshold = 0 
+
+AutoSkillLeftSection:Slider({
+    Name = "Dribble Z Touch Count",
+    Default = 0,
+    Minimum = 0,
+    Maximum = 5,
+    Precision = 0,
+    Suffix = "",
+    Tooltip = "0 = Off | Adjust touch count",
+    Pointer = "AutoSkillTouchCount",
+    Callback = function(value)
+        _G.touchThreshold = value
+    end
+})
+
+player.CharacterAdded:Connect(function(char)
+    char:WaitForChild("HumanoidRootPart").Touched:Connect(function(hit)
+        if _G.touchThreshold == 0 then return end
+        if hit.Name == "TPS" or hit.Name == "PSoccerBall" then
+            if tick() - lastTouch > 0.3 then
+                touchCount = touchCount + 1
+                lastTouch = tick()
+                if touchCount >= _G.touchThreshold then
+                    performInstantTurn()
+                    touchCount = 0 
+                end
+            end
+        end
+    end)
+end)
+
+if player.Character then
+    player.Character:WaitForChild("HumanoidRootPart").Touched:Connect(function(hit)
+        if _G.touchThreshold == 0 then return end
+        if hit.Name == "TPS" or hit.Name == "PSoccerBall" then
+            if tick() - lastTouch > 0.3 then
+                touchCount = touchCount + 1
+                lastTouch = tick()
+                if touchCount >= _G.touchThreshold then
+                    performInstantTurn()
+                    touchCount = 0 
+                end
+            end
+        end
+    end)
+end

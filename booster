@@ -1,0 +1,107 @@
+----------------------------------------
+-- BOOSTERS TAB 
+----------------------------------------
+
+-- LEFT: Stamina
+local StaminaSection = tabs.Boosters:Section({ Side = "Left" })
+
+StaminaSection:Header({ Name = "Stamina" })
+
+StaminaSection:Button({
+    Name = "Instant Stamina Adder",
+    Callback = function()
+        local args = {1355887714, "SkillG", false}
+        if workspace.FE and workspace.FE.PlayerCard and workspace.FE.PlayerCard.Boost then
+            pcall(function()
+                workspace.FE.PlayerCard.Boost:FireServer(unpack(args))
+            end)
+        end
+    end
+})
+
+StaminaSection:Button({
+    Name = "Infinite Stamina",
+    Callback = function()
+        local oldFireServer
+        oldFireServer = hookmetamethod(game, "__namecall", function(self, ...)
+            local method = getnamecallmethod()
+            local args = {...}
+            if method == "FireServer" and tostring(self) == "Sprint" then
+                args[1] = "Ended"
+                return oldFireServer(self, unpack(args))
+            end
+            return oldFireServer(self, ...)
+        end)
+
+        local player = game.Players.LocalPlayer
+        local char = player.Character or player.CharacterAdded:Wait()
+        char.Humanoid.WalkSpeed = 22
+
+        local mouse = player:GetMouse()
+        mouse.KeyDown:Connect(function(key)
+            if key:lower() == "r" then
+                char.Humanoid.WalkSpeed = 16
+            end
+        end)
+
+        mouse.Button1Down:Connect(function()
+            char.Humanoid.WalkSpeed = 22
+        end)
+    end
+})
+
+------------------------------------------------
+-- RIGHT: MS Boost + Boost
+------------------------------------------------
+local BoostersRight = tabs.Boosters:Section({ Side = "Right" })
+
+-- MS Boost Header
+BoostersRight:Header({ Name = "MS Boost (Clumsy)" })
+
+BoostersRight:Input({
+    Name = "MS Increase Value",
+    Placeholder = "Example: 0.1",
+    AcceptedCharacters = "NumbersAndDecimal",
+    Callback = function(Value)
+        local num = tonumber(Value)
+        if num then
+            settings().Network.IncomingReplicationLag = num
+            Window:Notify({
+                Title = "MS Boost",
+                Description = "Ping delay set to: " .. tostring(num * 1000) .. "ms",
+                Lifetime = 3
+            })
+        else
+            Window:Notify({
+                Title = "MS Boost",
+                Description = "Invalid value!",
+                Lifetime = 3
+            })
+        end
+    end
+})
+
+BoostersRight:Divider()
+
+BoostersRight:Header({ Name = "Boost" })
+
+local function AddBoostButton(name, args)
+    BoostersRight:Button({
+        Name = name,
+        Callback = function()
+            if workspace.FE and workspace.FE.PlayerCard and workspace.FE.PlayerCard.Boost then
+                pcall(function()
+                    workspace.FE.PlayerCard.Boost:FireServer(unpack(args))
+                end)
+            end
+        end
+    })
+end
+
+AddBoostButton("Shoot Power",        {1570773663, "SkillA", false})
+AddBoostButton("Pass / Long Power",  {1588192351, "SkillB", false})
+AddBoostButton("Curve Power",        {1309722229, "SkillC", false})
+AddBoostButton("Tackle Power",       {862012192,  "SkillD", false})
+AddBoostButton("Skill Power",        {417646286,  "SkillE", false})
+AddBoostButton("GK Power",           {628934962,  "SkillF", false})
+AddBoostButton("Durability Power",   {5550729447, "SkillH", false})

@@ -1,0 +1,68 @@
+-- =========================================
+-- TAB GROUP
+-- =========================================
+local function yerelMesaj(baslik, icerik)
+    game.StarterGui:SetCore("SendNotification", {
+        ["Title"] = baslik,
+        ["Text"] = icerik,
+        ["Duration"] = 20
+    })
+end
+
+yerelMesaj("TPS: Ultimate Soccer", "Welcome To XHub!")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
+
+TextChatService.OnIncomingMessage = function(message)
+    local properties = Instance.new("TextChatMessageProperties")
+    
+local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
+
+local Window = MacLib:Window({
+    Title = "XHub",
+    Subtitle = "Public",
+    Size = UDim2.fromOffset(850, 600),
+    DragStyle = 1,
+    Keybind = Enum.KeyCode.RightControl, 
+    AcrylicBlur = true,
+    ShowUserInfo = true,
+})
+    -- [[ MUSIC ]]
+    local Sound = Instance.new("Sound")
+    Sound.Parent = game:GetService("SoundService")
+    Sound.SoundId = "rbxassetid://98777348372282" 
+    Sound.Volume = 1 -- 0-1
+    Sound.Looped = false 
+    Sound:Play()
+
+    game:GetService("Debris"):AddItem(Sound, 10)
+
+local tabGroup = Window:TabGroup()
+
+local tabs = {
+    FireTouch = tabGroup:Tab({ Name = "FireTouch", Image = "rbxassetid://18821914323" }),
+    React     = tabGroup:Tab({ Name = "React", Image = "rbxassetid://18821914323" }),
+    Boosters  = tabGroup:Tab({ Name = "Boosters", Image = "rbxassetid://18821914323" }),
+    Range     = tabGroup:Tab({ Name = "Range", Image = "rbxassetid://18821914323" }),
+    AutoSkill = tabGroup:Tab({ Name = "Auto Skill", Image = "rbxassetid://18821914323" }),
+    Misc      = tabGroup:Tab({ Name = "Misc", Image = "rbxassetid://18821914323" }),
+    Settings  = tabGroup:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
+
+-- =========================================
+-- SECTIONS
+-- =========================================
+local sections = {
+    FireTouchLeft = tabs.FireTouch:Section({ Side = "Left" }),
+    ReactLeft     = tabs.React:Section({ Side = "Left" }),
+    ReactRight    = tabs.React:Section({ Side = "Right" }), 
+    BoostersLeft  = tabs.Boosters:Section({ Side = "Left" }),
+    RangeLeft     = tabs.Range:Section({ Side = "Left" }),
+    AutoSkillLeft = tabs.AutoSkill:Section({ Side = "Left" }),
+    MiscLeft      = tabs.Misc:Section({ Side = "Left" }),
+}
+
+MacLib:SetFolder("XHub")
+tabs.Settings:InsertConfigSection("Left")
+
+tabs.FireTouch:Select()

@@ -1,0 +1,148 @@
+----------------------------------------
+-- MISC TAB
+----------------------------------------
+local MiscLeftSection = tabs.Misc:Section({ Side = "Left" })
+local MiscRightSection = tabs.Misc:Section({ Side = "Right" })
+
+-- FOV Slider 
+MiscLeftSection:Slider({
+    Name = "FOV",
+    Default = 70,
+    Minimum = 50,
+    Maximum = 120,
+    Precision = 0,
+    Suffix = "",
+    Tooltip = "Changes your field of view",
+    Callback = function(val)
+        if workspace.CurrentCamera then
+            workspace.CurrentCamera.FieldOfView = val
+        end
+    end
+})
+
+-- Utility Buttons 
+MiscRightSection:Button({
+    Name = "Unlimited Auto Pass Range",
+    Callback = function()
+        local runService = game:GetService("RunService")
+        local player = game.Players.LocalPlayer
+        local MAX_RANGE = 999999 
+
+        if not ToggleConnections.AutoPassRange then
+            ToggleConnections.AutoPassRange = runService.RenderStepped:Connect(function()
+                local char = player.Character
+                if char and char:FindFirstChild("HumanoidRootPart") then
+                    
+                    local params = RaycastParams.new()
+                    params.FilterType = Enum.RaycastFilterType.Include
+                    params.FilterDescendantsInstances = { workspace }
+                    
+                    local ray = workspace:Raycast(
+                        char.HumanoidRootPart.Position, 
+                        char.HumanoidRootPart.CFrame.LookVector * MAX_RANGE, 
+                        params
+                    )
+
+                    if ray then
+                        for _, target in pairs(game.Players:GetPlayers()) do
+                            -- Sadece senin takımında olan ve hayatta olan oyuncuları kontrol eder
+                            if target ~= player and target.TeamColor == player.TeamColor and target.Character then
+                                local head = target.Character:FindFirstChild("Head")
+                                local root = target.Character:FindFirstChild("HumanoidRootPart")
+                                
+                                if head and head:FindFirstChild("PointerGui") and root then
+                                    local dist = (root.Position - ray.Position).Magnitude
+                                    if dist < 50 then 
+                                        head.PointerGui.Enabled = true
+                                    end
+                                end
+                            end
+                        end
+                    end
+                end
+            end)
+        end
+    end,
+    Tooltip = "Team members' PointerGui will be enabled regardless of distance."
+})
+
+MiscRightSection:Button({
+    Name = "Anti Offside",
+    Callback = function()
+        local function safeExecute(func)
+            local success, _ = pcall(func)
+        end
+        safeExecute(function()
+            local tpsPart = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")
+            if tpsPart then
+                for _, name in ipairs({ "Offside", "Offside Check" }) do
+                    local obj = tpsPart:FindFirstChild(name)
+                    if obj then
+                        obj:Destroy()
+                    end
+                end
+            end
+        end)
+    end,
+    Tooltip = "Prevents you from being called offside."
+})
+MiscRightSection:Button({
+    Name = "Optimize FPS",
+    Callback = function()
+        local function safeExecute(func)
+            local success, _ = pcall(func)
+        end
+
+        safeExecute(function()
+            -- 1. LIGHTING SETTINGS 
+            local lighting = game:GetService("Lighting")
+            lighting.GlobalShadows = false
+            lighting.FogEnd = 100000
+            lighting.Brightness = 1
+            lighting.ExposureCompensation = 0
+            lighting.OutdoorAmbient = Color3.fromRGB(128, 128, 128)
+            
+            for _, effect in pairs(lighting:GetChildren()) do
+                if effect:IsA("PostEffect") then 
+                    effect.Enabled = false 
+                end
+            end
+
+            local lp = game:GetService("Players").LocalPlayer
+            for _, v in pairs(workspace:GetDescendants()) do
+                -- Karakterinin parçası olmayan her şeyin dokusunu düşürür [cite: 2026-01-29]
+                if not (lp.Character and v:IsDescendantOf(lp.Character)) then
+                    if v:IsA("ParticleEmitter") or v:IsA("Trail") then
+                        v.Enabled = false
+                    elseif v:IsA("Decal") or v:IsA("Texture") then
+                        v.Transparency = 0.8 -- %80 şeffaflık ile FPS artışı [cite: 2026-01-29]
+                    end
+                end
+            end
+
+            -- 3. WORKSPACE 
+            local toDelete = {
+                "Ads", "Donators", "Leaderboards", "DottedLines", "Drinks", "Memories",
+                "Benchs", "Managers", "CelebrateStand", "Boards", "Camera1", "Cameras",
+                "GKSystem", "Referee", "Referee2", "VARModel", "WLeaderboards"
+            }
+            for _, name in pairs(toDelete) do
+                local obj = workspace:FindFirstChild(name)
+                if obj then obj:Destroy() end
+            end
+
+            local riskyFolders = {"Worn", "JerseysTeam", "JerseyP1", "JerseyP2"}
+            for _, folderName in pairs(riskyFolders) do
+                local folder = workspace:FindFirstChild(folderName)
+                if folder then
+                    for _, item in pairs(folder:GetChildren()) do
+                        if item.Name ~= lp.Name then 
+                            item:Destroy() 
+                        end
+                    end
+                end
+            end
+        end)
+    end,
+    Tooltip = "Optimizes shadows, lights, and stadium models to boost FPS."
+})

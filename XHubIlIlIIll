@@ -124,9 +124,6 @@ end
 yerelMesaj("TPS: Ultimate Soccer", "Welcome To XHub!")
 local TextChatService = game:GetService("TextChatService")
 local Players = game:GetService("Players")
-
-TextChatService.OnIncomingMessage = function(message)
-    local properties = Instance.new("TextChatMessageProperties")
     
 local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
 
@@ -937,7 +934,7 @@ local function ToggleTackyRange(enabled)
         T23.Orientation = Vector3.new(0, 90, 0)
 
         -- =========================
-        --  TACKY2
+        --  TACKY2
         -- =========================
         local TACKY2 = Instance.new("Part")
         TACKY2.Parent = workspace
@@ -1289,5 +1286,8 @@ SettingsLeftSection:Keybind({
     Name = "Menu Keybind",
     Default = Enum.KeyCode.K,
     NoUI = true,
-    Text = "Toggle menu visibility"
+    Text = "Toggle menu visibility",
+    Callback = function()
+        Library:Toggle()
+    end
 })

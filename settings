@@ -1,0 +1,13 @@
+----------------------------------------
+-- SETTINGS TAB 
+----------------------------------------
+local SettingsLeftSection = tabs.Settings:Section({ Side = "Left" })
+
+SettingsLeftSection:Label({ Text = "Menu Settings" })
+
+SettingsLeftSection:Keybind({
+    Name = "Menu Keybind",
+    Default = Enum.KeyCode.K,
+    NoUI = true,
+    Text = "Toggle menu visibility"
+})

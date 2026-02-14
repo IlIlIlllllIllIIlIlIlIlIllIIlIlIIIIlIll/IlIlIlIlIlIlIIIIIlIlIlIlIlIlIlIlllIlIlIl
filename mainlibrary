@@ -1,0 +1,240 @@
+-- [[ 1. SERVICES ]]
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- [[ 2. INTRO UI ]]
+local IntroGui = Instance.new("ScreenGui", CoreGui)
+IntroGui.Name = "XHubIntrto"
+IntroGui.IgnoreGuiInset = true
+
+local Main = Instance.new("Frame", IntroGui)
+Main.Size = UDim2.fromOffset(420, 280)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
+local Welcome = Instance.new("TextLabel", Main)
+Welcome.Size = UDim2.new(1, 0, 0, 160)
+Welcome.Position = UDim2.fromOffset(0, 20)
+Welcome.BackgroundTransparency = 1
+Welcome.Font = Enum.Font.GothamBold
+Welcome.TextColor3 = Color3.new(1, 1, 1)
+Welcome.TextSize = 16
+Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nUpdates (29.01.2026):\n• Auto Skill Added."
+
+local OK = Instance.new("TextButton", Main)
+OK.Size = UDim2.fromOffset(160, 45)
+OK.Position = UDim2.new(0.5, -80, 1, -65)
+OK.Text = "OK / PROCEED"
+OK.Font = Enum.Font.GothamBold
+OK.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+OK.TextColor3 = Color3.new(1, 1, 1)
+OK.TextSize = 14
+Instance.new("UICorner", OK).CornerRadius = UDim.new(0, 12)
+
+-- [[ 3. ANIMATION SYSTEM ]]
+local Proceed = false
+OK.MouseButton1Click:Connect(function() 
+    Proceed = true 
+end)
+
+repeat task.wait() until Proceed 
+
+TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0,0)}):Play()
+task.wait(0.55)
+IntroGui:Destroy()
+
+local PartConnections = {}
+_G.PartDistances = {
+    ["Left Leg"] = 0, ["Right Leg"] = 0, ["Torso"] = 0, ["Head"] = 0, ["GK"] = 0,
+}
+local GK_PARTS = {"Right Arm", "Left Arm"}
+
+local function HandlePartReach(PartName, Distance)
+    local IsGK = (PartName == "GK")
+    local TargetParts = IsGK and GK_PARTS or {PartName}
+
+    if Distance <= 0 then
+        if PartConnections[PartName] then
+            PartConnections[PartName]:Disconnect()
+            PartConnections[PartName] = nil
+        end
+        return
+    end
+
+    _G.PartDistances[PartName] = Distance
+
+    if not PartConnections[PartName] then
+        PartConnections[PartName] = RunService.RenderStepped:Connect(function()
+            local char = Players.LocalPlayer.Character
+            local root = char and char:FindFirstChild("HumanoidRootPart")
+            if not root then return end
+
+            local Targets = {}
+            local MatchBall = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")
+            if MatchBall then table.insert(Targets, MatchBall) end
+
+            local PracticeFolder = workspace:FindFirstChild("Practice")
+            if PracticeFolder then
+                for _, ball in ipairs(PracticeFolder:GetChildren()) do
+                    if ball.Name == "PSoccerBall" and ball:IsA("BasePart") then
+                        table.insert(Targets, ball)
+                    end
+                end
+            end
+
+            for _, Target in ipairs(Targets) do
+                if (root.Position - Target.Position).Magnitude <= _G.PartDistances[PartName] then
+                    for _, pName in ipairs(TargetParts) do
+                        local p = char:FindFirstChild(pName)
+                        if p then
+                            firetouchinterest(p, Target, 0)
+                            firetouchinterest(p, Target, 1)
+                        end
+                    end
+                end
+            end
+        end)
+    end
+end
+-- =========================================
+-- TAB GROUP
+-- =========================================
+local function yerelMesaj(baslik, icerik)
+    game.StarterGui:SetCore("SendNotification", {
+        ["Title"] = baslik,
+        ["Text"] = icerik,
+        ["Duration"] = 20
+    })
+end
+
+yerelMesaj("TPS: Ultimate Soccer", "Welcome To XHub!")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
+
+TextChatService.OnIncomingMessage = function(message)
+    local properties = Instance.new("TextChatMessageProperties")
+    
+local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
+
+local Window = MacLib:Window({
+    Title = "XHub",
+    Subtitle = "Public",
+    Size = UDim2.fromOffset(850, 600),
+    DragStyle = 1,
+    Keybind = Enum.KeyCode.RightControl, 
+    AcrylicBlur = true,
+    ShowUserInfo = true,
+})
+    -- [[ MUSIC ]]
+    local Sound = Instance.new("Sound")
+    Sound.Parent = game:GetService("SoundService")
+    Sound.SoundId = "rbxassetid://98777348372282" 
+    Sound.Volume = 1 -- 0-1
+    Sound.Looped = false 
+    Sound:Play()
+
+    game:GetService("Debris"):AddItem(Sound, 10)
+
+local tabGroup = Window:TabGroup()
+
+local tabs = {
+    FireTouch = tabGroup:Tab({ Name = "FireTouch", Image = "rbxassetid://18821914323" }),
+    React     = tabGroup:Tab({ Name = "React", Image = "rbxassetid://18821914323" }),
+    Boosters  = tabGroup:Tab({ Name = "Boosters", Image = "rbxassetid://18821914323" }),
+    Range     = tabGroup:Tab({ Name = "Range", Image = "rbxassetid://18821914323" }),
+    AutoSkill = tabGroup:Tab({ Name = "Auto Skill", Image = "rbxassetid://18821914323" }),
+    Misc      = tabGroup:Tab({ Name = "Misc", Image = "rbxassetid://18821914323" }),
+    Settings  = tabGroup:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
+
+-- =========================================
+-- SECTIONS
+-- =========================================
+local sections = {
+    FireTouchLeft = tabs.FireTouch:Section({ Side = "Left" }),
+    ReactLeft     = tabs.React:Section({ Side = "Left" }),
+    ReactRight    = tabs.React:Section({ Side = "Right" }), 
+    BoostersLeft  = tabs.Boosters:Section({ Side = "Left" }),
+    RangeLeft     = tabs.Range:Section({ Side = "Left" }),
+    AutoSkillLeft = tabs.AutoSkill:Section({ Side = "Left" }),
+    MiscLeft      = tabs.Misc:Section({ Side = "Left" }),
+}
+
+MacLib:SetFolder("XHub")
+tabs.Settings:InsertConfigSection("Left")
+
+tabs.FireTouch:Select()
+-- =========================================
+-- TAB GROUP
+-- =========================================
+local function yerelMesaj(baslik, icerik)
+    game.StarterGui:SetCore("SendNotification", {
+        ["Title"] = baslik,
+        ["Text"] = icerik,
+        ["Duration"] = 20
+    })
+end
+
+yerelMesaj("TPS: Ultimate Soccer", "Welcome To XHub!")
+local TextChatService = game:GetService("TextChatService")
+local Players = game:GetService("Players")
+
+TextChatService.OnIncomingMessage = function(message)
+    local properties = Instance.new("TextChatMessageProperties")
+    
+local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
+
+local Window = MacLib:Window({
+    Title = "XHub",
+    Subtitle = "Public",
+    Size = UDim2.fromOffset(850, 600),
+    DragStyle = 1,
+    Keybind = Enum.KeyCode.RightControl, 
+    AcrylicBlur = true,
+    ShowUserInfo = true,
+})
+    -- [[ MUSIC ]]
+    local Sound = Instance.new("Sound")
+    Sound.Parent = game:GetService("SoundService")
+    Sound.SoundId = "rbxassetid://98777348372282" 
+    Sound.Volume = 1 -- 0-1
+    Sound.Looped = false 
+    Sound:Play()
+
+    game:GetService("Debris"):AddItem(Sound, 10)
+
+local tabGroup = Window:TabGroup()
+
+local tabs = {
+    FireTouch = tabGroup:Tab({ Name = "FireTouch", Image = "rbxassetid://18821914323" }),
+    React     = tabGroup:Tab({ Name = "React", Image = "rbxassetid://18821914323" }),
+    Boosters  = tabGroup:Tab({ Name = "Boosters", Image = "rbxassetid://18821914323" }),
+    Range     = tabGroup:Tab({ Name = "Range", Image = "rbxassetid://18821914323" }),
+    AutoSkill = tabGroup:Tab({ Name = "Auto Skill", Image = "rbxassetid://18821914323" }),
+    Misc      = tabGroup:Tab({ Name = "Misc", Image = "rbxassetid://18821914323" }),
+    Settings  = tabGroup:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
+
+-- =========================================
+-- SECTIONS
+-- =========================================
+local sections = {
+    FireTouchLeft = tabs.FireTouch:Section({ Side = "Left" }),
+    ReactLeft     = tabs.React:Section({ Side = "Left" }),
+    ReactRight    = tabs.React:Section({ Side = "Right" }), 
+    BoostersLeft  = tabs.Boosters:Section({ Side = "Left" }),
+    RangeLeft     = tabs.Range:Section({ Side = "Left" }),
+    AutoSkillLeft = tabs.AutoSkill:Section({ Side = "Left" }),
+    MiscLeft      = tabs.Misc:Section({ Side = "Left" }),
+}
+
+MacLib:SetFolder("XHub")
+tabs.Settings:InsertConfigSection("Left")
+
+tabs.FireTouch:Select()

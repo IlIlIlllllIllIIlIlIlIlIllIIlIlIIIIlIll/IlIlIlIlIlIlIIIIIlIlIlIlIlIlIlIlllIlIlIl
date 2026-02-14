@@ -1,0 +1,82 @@
+
+local HttpService = game:GetService("HttpService")
+local Players = game:GetService("Players")
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1470490073526042655/fWbXgv7f7ke0VnmLjblRSUhcQ0VWAHW3N7mIxS1bUgkRFxPExKE0mEvHb_NGj5OoEBJE"
+
+local function GetRealAvatar(userId)
+    local api = "https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userId.."&size=150x150&format=Png&isCircular=false"
+    local success, response = pcall(function()
+        return game:HttpGet(api)
+    end)
+    
+    if success then
+        local data = HttpService:JSONDecode(response)
+        if data and data.data and data.data[1] and data.data[1].imageUrl then
+            return data.data[1].imageUrl
+        end
+    end
+    return "https://www.roblox.com/headshot-thumbnail/image?userId="..userId.."&width=150&height=150&format=png"
+end
+
+local function SendWaowStatus()
+    local lp = Players.LocalPlayer
+    local avatarUrl = GetRealAvatar(lp.UserId)
+    
+    local ping = "N/A"
+    local clumsy = "0ms"
+    pcall(function()
+        ping = math.floor(lp:GetNetworkPing() * 1000) .. "ms"
+        -- Clumsy değerini çekiyoruz
+        clumsy = settings().Network.IncomingReplicationLag .. "ms"
+    end)
+    
+    local ft = _G.PartDistances or {}
+    local function getVal(name) return (ft[name] and ft[name] > 0) and "Active ✅" or "Passive ❌" end
+    local function getDist(name) return ft[name] or "0" end
+
+    local ftDisplay = string.format(
+        "🦵 **Right Leg:** %s (`%s`)\n🦵 **Left Leg:** %s (`%s`)\n👕 **Torso:** %s (`%s`)\n👤 **Head:** %s (`%s`)\n🧤 **GK Touch:** %s (`%s`)",
+        getVal("Right Leg"), getDist("Right Leg"),
+        getVal("Left Leg"), getDist("Left Leg"),
+        getVal("Torso"), getDist("Torso"),
+        getVal("Head"), getDist("Head"),
+        getVal("GK"), getDist("GK")
+    )
+
+    local payload = {
+        ["embeds"] = {{
+            ["title"] = "👑 WaowHub - Oyuncu: " .. lp.Name,
+            ["color"] = 0xFF8C00,
+            ["thumbnail"] = { ["url"] = avatarUrl },
+            ["fields"] = {
+                {["name"] = "🎯 Ayarlar & Mesafeler", ["value"] = ftDisplay, ["inline"] = false},
+                {["name"] = "🪄 Auto Skill", ["value"] = "`" .. tostring(_G.touchThreshold or 0) .. " Touch`", ["inline"] = true},
+                {["name"] = "🚀 Ping", ["value"] = "`" .. ping .. "`", ["inline"] = true},
+                {["name"] = "🥴 Clumsy", ["value"] = "`" .. clumsy .. "`", ["inline"] = true} 
+            },
+            ["footer"] = {["text"] = "Rapor Aralığı: 300 Saniye"},
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    local requestFunc = (syn and syn.request) or (http and http.request) or http_request or request
+    if requestFunc then
+        pcall(function()
+            requestFunc({
+                Url = WEBHOOK_URL,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end
+end
+
+task.spawn(function()
+    while true do
+        SendWaowStatus()
+        task.wait(300)
+    end
+end)
+
+task.delay(1, function() SendWaowStatus() end)

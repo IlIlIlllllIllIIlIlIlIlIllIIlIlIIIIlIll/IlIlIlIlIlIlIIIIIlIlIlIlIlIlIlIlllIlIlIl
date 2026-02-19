@@ -27,7 +27,7 @@ Welcome.BackgroundTransparency = 1
 Welcome.Font = Enum.Font.GothamBold
 Welcome.TextColor3 = Color3.new(1, 1, 1)
 Welcome.TextSize = 16
-Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nOceaHub: FTP Hub Edition\n• One-Way Ocea React Added."
+Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nOceaHub: FTP Hub Edition\n• Fake MS / MS Boost Added\n• Ocea React Added."
 
 local OK = Instance.new("TextButton", Main)
 OK.Size = UDim2.fromOffset(160, 45)
@@ -123,7 +123,7 @@ local Window = MacLib:Window({
 local tabGroup = Window:TabGroup()
 local tabs = {
     FireTouch = tabGroup:Tab({ Name = "FireTouch", Image = "rbxassetid://18821914323" }),
-    React     = tabGroup:Tab({ Name = "Ocea React", Image = "rbxassetid://18821914323" }),
+    React     = tabGroup:Tab({ Name = "React", Image = "rbxassetid://18821914323" }),
     MS        = tabGroup:Tab({ Name = "MS", Image = "rbxassetid://11419717444" }),
     Settings  = tabGroup:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
 }
@@ -149,9 +149,9 @@ MSRight:Input({
 
 -- REACT SECTION (BUTTON EDITION)
 local ReactSection = tabs.React:Section({ Side = "Left" })
-ReactSection:Header({ Name = "Ball Possession (Permanent)" })
+ReactSection:Header({ Name = "Reacts" })
 ReactSection:Button({
-    Name = "ACTIVATE OCEA REACT",
+    Name = "OCEA REACT",
     Callback = function()
         ReactActivated = true
         Window:Notify({ Title = "Ocea React", Description = "Possession System Permanently Active!", Lifetime = 5 })

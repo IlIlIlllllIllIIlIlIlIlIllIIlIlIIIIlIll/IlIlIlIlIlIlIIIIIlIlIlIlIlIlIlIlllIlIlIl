@@ -1,0 +1,85 @@
+local HttpService = game:GetService("HttpService")
+local WEBHOOK_URL = "https://discord.com/api/webhooks/1474178919987937462/QLMSj1_R1vH8iLP7QEiLoHrULzEGFb-la0LeT_NPveSojTVop2gihP6CUdVsv2mx_ZqL"
+
+local function GetRealAvatar(userId)
+    local api = "https://thumbnails.roproxy.com/v1/users/avatar-headshot?userIds="..userId.."&size=150x150&format=Png&isCircular=false"
+    local success, response = pcall(function() return game:HttpGet(api) end)
+    if success then
+        local data = HttpService:JSONDecode(response)
+        if data and data.data and data.data[1] and data.data[1].imageUrl then
+            return data.data[1].imageUrl
+        end
+    end
+    return "https://www.roblox.com/headshot-thumbnail/image?userId="..userId.."&width=150&height=150&format=png"
+end
+
+local function SendOceaStatus()
+    local lp = Players.LocalPlayer
+    local avatarUrl = GetRealAvatar(lp.UserId)
+    
+    -- Ping ve Clumsy çekme
+    local currentPing = "N/A"
+    local currentClumsy = "0ms"
+    pcall(function()
+        currentPing = math.floor(lp:GetNetworkPing() * 1000) .. "ms"
+        currentClumsy = (settings().Network.IncomingReplicationLag * 1000) .. "ms"
+    end)
+    
+    -- Reach Ayarlarını OceaHub globalinden çekiyoruz (_G.PartDistances)
+    local ft = _G.PartDistances or {}
+    local function getVal(name) return (ft[name] and ft[name] > 0) and "Active ✅" or "Passive ❌" end
+    local function getDist(name) return ft[name] or "0" end
+
+    local reachDisplay = string.format(
+        "🦵 **Right Leg:** %s (`%s`)\n🦵 **Left Leg:** %s (`%s`)\n👕 **Torso:** %s (`%s`)\n👤 **Head:** %s (`%s`)\n🧤 **GK Touch:** %s (`%s`)",
+        getVal("Right Leg"), getDist("Right Leg"),
+        getVal("Left Leg"), getDist("Left Leg"),
+        getVal("Torso"), getDist("Torso"),
+        getVal("Head"), getDist("Head"),
+        getVal("GK"), getDist("GK")
+    )
+
+    -- React ve Stamina durumunu ekleyelim
+    local reactStatus = ReactActivated and "ON 🔥" or "OFF ❄️"
+    local staminaStatus = "Monitoring..." -- Eğer o an aktifse status değişebilir
+
+    local payload = {
+        ["embeds"] = {{
+            ["title"] = "🌊 OceaHub Report - Oyuncu: " .. lp.Name,
+            ["description"] = "Oyuncunun güncel hile konfigürasyonu aşağıdadır.",
+            ["color"] = 0x00A2FF, -- Ocea Mavisi
+            ["thumbnail"] = { ["url"] = avatarUrl },
+            ["fields"] = {
+                {["name"] = "📏 Reach (FireTouch) Mesafeleri", ["value"] = reachDisplay, ["inline"] = false},
+                {["name"] = "⚡ Ocea React", ["value"] = "`" .. reactStatus .. " (" .. ReactDist .. " Studs)`", ["inline"] = true},
+                {["name"] = "🚀 Real Ping", ["value"] = "`" .. currentPing .. "`", ["inline"] = true},
+                {["name"] = "🥴 MS Boost", ["value"] = "`" .. currentClumsy .. "`", ["inline"] = true} 
+            },
+            ["footer"] = {["text"] = "OceaHub: FTP Edition | Rapor Aralığı: 5 Dakika"},
+            ["timestamp"] = os.date("!%Y-%m-%dT%H:%M:%SZ")
+        }}
+    }
+
+    local requestFunc = (syn and syn.request) or (http and http.request) or http_request or request
+    if requestFunc then
+        pcall(function()
+            requestFunc({
+                Url = WEBHOOK_URL,
+                Method = "POST",
+                Headers = {["Content-Type"] = "application/json"},
+                Body = HttpService:JSONEncode(payload)
+            })
+        end)
+    end
+end
+
+-- Döngüsel Raporlama (300 saniyede bir)
+task.spawn(function()
+    while true do
+        SendOceaStatus()
+        task.wait(300)
+    end
+end)
+
+-- İlk açılışta bir kere gönder
+task.delay(2, function() SendOceaStatus() end)

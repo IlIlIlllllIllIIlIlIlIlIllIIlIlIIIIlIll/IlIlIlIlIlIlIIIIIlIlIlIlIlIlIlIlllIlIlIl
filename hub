@@ -1,0 +1,149 @@
+-- [[ 1. SERVICES ]]
+local Players = game:GetService("Players")
+local TweenService = game:GetService("TweenService")
+local CoreGui = game:GetService("CoreGui")
+local RunService = game:GetService("RunService")
+local LocalPlayer = Players.LocalPlayer
+
+-- [[ 2. INTRO UI ]]
+local IntroGui = Instance.new("ScreenGui", CoreGui)
+IntroGui.Name = "OceaHubIntro"
+IntroGui.IgnoreGuiInset = true
+
+local Main = Instance.new("Frame", IntroGui)
+Main.Size = UDim2.fromOffset(420, 280)
+Main.Position = UDim2.fromScale(0.5, 0.5)
+Main.AnchorPoint = Vector2.new(0.5, 0.5)
+Main.BackgroundColor3 = Color3.fromRGB(15, 15, 18)
+Main.ClipsDescendants = true
+Instance.new("UICorner", Main).CornerRadius = UDim.new(0, 18)
+
+local Welcome = Instance.new("TextLabel", Main)
+Welcome.Size = UDim2.new(1, 0, 0, 160)
+Welcome.Position = UDim2.fromOffset(0, 20)
+Welcome.BackgroundTransparency = 1
+Welcome.Font = Enum.Font.GothamBold
+Welcome.TextColor3 = Color3.new(1, 1, 1)
+Welcome.TextSize = 16
+Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nOceaHub: FTP Hub Edition\n• FireTouch Added."
+local OK = Instance.new("TextButton", Main)
+OK.Size = UDim2.fromOffset(160, 45)
+OK.Position = UDim2.new(0.5, -80, 1, -65)
+OK.Text = "OK / PROCEED"
+OK.Font = Enum.Font.GothamBold
+OK.BackgroundColor3 = Color3.fromRGB(35, 35, 40)
+OK.TextColor3 = Color3.new(1, 1, 1)
+OK.TextSize = 14
+Instance.new("UICorner", OK).CornerRadius = UDim.new(0, 12)
+
+-- [[ 3. ANIMATION SYSTEM ]]
+local Proceed = false
+OK.MouseButton1Click:Connect(function() Proceed = true end)
+repeat task.wait() until Proceed 
+
+TweenService:Create(Main, TweenInfo.new(0.5, Enum.EasingStyle.Quart, Enum.EasingDirection.Out), {Size = UDim2.fromOffset(0,0)}):Play()
+task.wait(0.55)
+IntroGui:Destroy()
+
+-- [[ 4. CORE REACH SYSTEM (FTP HUB VERSION) ]]
+local BALL_FOLDER = workspace:WaitForChild("Game"):WaitForChild("Balls")
+local GK_PARTS = {"Right Arm", "Left Arm"}
+local PartConnections = {}
+_G.PartDistances = { ["Left Leg"] = 0, ["Right Leg"] = 0, ["Torso"] = 0, ["Head"] = 0, ["GK"] = 0 }
+
+local function HandlePartReach(PartName, Distance)
+    if PartConnections[PartName] then PartConnections[PartName]:Disconnect() end
+    
+    if Distance <= 0 then
+        PartConnections[PartName] = nil
+        return
+    end
+
+    _G.PartDistances[PartName] = Distance
+
+    PartConnections[PartName] = RunService.RenderStepped:Connect(function()
+        local char = LocalPlayer.Character
+        local root = char and char:FindFirstChild("HumanoidRootPart")
+        if not root then return end
+
+        local targetParts = (PartName == "GK") and GK_PARTS or {PartName}
+
+        -- Tüm topları tara
+        for _, ball in ipairs(BALL_FOLDER:GetChildren()) do
+            if ball:IsA("BasePart") then
+                local mag = (root.Position - ball.Position).Magnitude
+                if mag <= _G.PartDistances[PartName] then
+                    for _, pName in ipairs(targetParts) do
+                        local p = char:FindFirstChild(pName)
+                        if p then 
+                            firetouchinterest(p, ball, 0)
+                            firetouchinterest(p, ball, 1)
+                        end
+                    end
+                end
+            end
+        end
+    end)
+end
+
+-- =========================================
+-- MAIN UI SETUP
+-- =========================================
+local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
+
+local Window = MacLib:Window({
+    Title = "OceaHub",
+    Subtitle = "FTP: Hub Edition",
+    Size = UDim2.fromOffset(850, 600),
+    DragStyle = 1,
+    Keybind = Enum.KeyCode.RightControl, 
+    AcrylicBlur = true,
+    ShowUserInfo = true,
+})
+
+local tabGroup = Window:TabGroup()
+local tabs = {
+    FireTouch = tabGroup:Tab({ Name = "FireTouch", Image = "rbxassetid://18821914323" }),
+    Misc      = tabGroup:Tab({ Name = "Misc", Image = "rbxassetid://18821914323" }),
+    Settings  = tabGroup:Tab({ Name = "Settings", Image = "rbxassetid://10734950309" }),
+}
+
+local sections = {
+    FireTouchLeft = tabs.FireTouch:Section({ Side = "Left" }),
+}
+
+-- CONFIG SECTION
+MacLib:SetFolder("OceaHub")
+tabs.Settings:InsertConfigSection("Left")
+tabs.FireTouch:Select()
+
+-- SLIDER GENERATOR
+sections.FireTouchLeft:Header({ Name = "Reach Settings" })
+
+local function CreateReachSlider(partName)
+    sections.FireTouchLeft:Slider({
+        Name = partName .. " Studs",
+        Default = 0,
+        Minimum = 0,
+        Maximum = 30,
+        Precision = 1,
+        DisplayMethod = "Value",
+        Callback = function(Value)
+            local FloorValue = math.floor(Value * 10) / 10
+            HandlePartReach(partName, FloorValue)
+        end
+    })
+end
+
+CreateReachSlider("Left Leg")
+CreateReachSlider("Right Leg")
+CreateReachSlider("Torso")
+CreateReachSlider("Head")
+CreateReachSlider("GK")
+
+game.StarterGui:SetCore("SendNotification", {
+    Title = "OceaHub Loaded",
+    Text = "Enjoy FTP Hub Reach!",
+    Duration = 5
+})
+

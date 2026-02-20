@@ -31,7 +31,7 @@ Welcome.BackgroundTransparency = 1
 Welcome.Font = Enum.Font.GothamBold
 Welcome.TextColor3 = Color3.new(1, 1, 1)
 Welcome.TextSize = 16
-Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nUpdates (15.02.2026):\n• Edited For Public."
+Welcome.Text = "WELCOME " .. LocalPlayer.Name .. "\n\nUpdates (20.02.2026):\n• Collision Added."
 
 local OK = Instance.new("TextButton", Main)
 OK.Size = UDim2.fromOffset(160, 45)
@@ -1267,6 +1267,63 @@ MiscRightSection:Button({
     end,
     Tooltip = "Optimizes shadows, lights, and stadium models to boost FPS."
 })
+-- Ball Collision Toggle (RIGHT)
+MiscRightSection:Toggle({
+    Name = "Enable Ball Collision",
+    Default = false,
+    Tooltip = "Makes the match and practice balls solid so you can collide with them.",
+    Callback = function(state)
+        _G.BallCollisionActive = state -- Döngü bu değişkenle kontrol edilir
+        
+        -- Kapatıldığında topları orijinal (içinden geçilebilir) grubuna geri döndürür
+        if not state then
+            pcall(function()
+                -- Maç topu sıfırlama
+                local matchBall = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")
+                if matchBall then 
+                    matchBall.CollisionGroup = "Ball" 
+                end
+                
+                -- Pratik topları sıfırlama
+                local practiceFolder = workspace:FindFirstChild("Practice")
+                if practiceFolder then
+                    for _, ball in pairs(practiceFolder:GetChildren()) do
+                        if ball.Name == "PSoccerBall" then
+                            ball.CollisionGroup = "Ball"
+                        end
+                    end
+                end
+            end)
+        end
+    end
+})
+
+-- Collision Loop (Bunu scriptin en altına, diğer döngülerin yanına koyabilirsin)
+game:GetService("RunService").Stepped:Connect(function()
+    if _G.BallCollisionActive then
+        -- 1. Maç Topu Kontrolü
+        local matchBall = workspace:FindFirstChild("TPSSystem") and workspace.TPSSystem:FindFirstChild("TPS")
+        if matchBall and matchBall:IsA("BasePart") then
+            if matchBall.CollisionGroup ~= "Default" then
+                matchBall.CollisionGroup = "Default"
+                matchBall.CanCollide = true
+            end
+        end
+        
+        -- 2. Pratik Topları Kontrolü
+        local practiceFolder = workspace:FindFirstChild("Practice")
+        if practiceFolder then
+            for _, ball in pairs(practiceFolder:GetChildren()) do
+                if ball.Name == "PSoccerBall" and ball:IsA("BasePart") then
+                    if ball.CollisionGroup ~= "Default" then
+                        ball.CollisionGroup = "Default"
+                        ball.CanCollide = true
+                    end
+                end
+            end
+        end
+    end
+end)
 
 ----------------------------------------
 -- SETTINGS TAB

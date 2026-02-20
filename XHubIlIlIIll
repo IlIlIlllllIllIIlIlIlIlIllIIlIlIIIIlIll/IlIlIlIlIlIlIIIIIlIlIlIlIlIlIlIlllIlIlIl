@@ -13,7 +13,7 @@ local LocalPlayer = Players.LocalPlayer
 
 -- [[ 2. INTRO UI ]]
 local IntroGui = Instance.new("ScreenGui", CoreGui)
-IntroGui.Name = "XHubIntro"
+IntroGui.Name = "OceaHubIntro"
 IntroGui.IgnoreGuiInset = true
 
 local Main = Instance.new("Frame", IntroGui)
@@ -451,14 +451,14 @@ local function LocalMessage(Title, Text)
     })
 end
 
-LocalMessage("TPS: Ultimate Soccer", "Welcome To XHub!")
+LocalMessage("TPS: Ultimate Soccer", "Welcome To OceaHub!")
 
 -- 1. Library
 local MacLib = loadstring(game:HttpGet("https://github.com/biggaboy212/Maclib/releases/latest/download/maclib.txt"))()
 
 -- 2. Tab
 local Window = MacLib:Window({
-    Title = "XHub",
+    Title = "OceaHub",
     Subtitle = "Public Script",
     Size = UDim2.fromOffset(850, 600),
     DragStyle = 1,
@@ -502,7 +502,7 @@ local sections = {
 }
 
 -- Settings
-MacLib:SetFolder("XHub")
+MacLib:SetFolder("OceaHub")
 tabs.Settings:InsertConfigSection("Left")
 
 tabs.FireTouch:Select()
